@@ -1,3 +1,5 @@
+"use client";
+
 export function LeftSideBar() {
-  return <div className="w-[300px] h-full bg-[var(--gray-1)]">LeftSideBar</div>;
+  return <div className="min-w-[300px] h-full bg-[var(--gray-1)] resize">LeftSideBar</div>;
 }
