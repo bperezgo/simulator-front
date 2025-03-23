@@ -1,9 +1,9 @@
 "use client";
 
 import { withPanel } from "@/hoc/Panel";
-import { Computer } from "lucide-react";
+// import { Computer } from "lucide-react";
 import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Dot, Line, LineChart } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   Card,
   CardContent,
@@ -18,48 +18,166 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
-  { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
-  { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
-  { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
-  { browser: "other", visitors: 90, fill: "var(--color-other)" },
-];
-const chartConfig = {
-  visitors: {
-    label: "Visitors",
-    color: "hsl(var(--chart-2))",
-  },
-  chrome: {
-    label: "Chrome",
-    color: "hsl(var(--chart-1))",
-  },
-  safari: {
-    label: "Safari",
-    color: "hsl(var(--chart-2))",
-  },
-  firefox: {
-    label: "Firefox",
-    color: "hsl(var(--chart-3))",
-  },
-  edge: {
-    label: "Edge",
-    color: "hsl(var(--chart-4))",
-  },
-  other: {
-    label: "Other",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+
+const responseFromBackend = {
+  parameters: [
+    {
+      label: "1700",
+      value: 6,
+    },
+    {
+      label: "1600",
+      value: 4,
+    },
+    {
+      label: "1500",
+      value: 3,
+    },
+    {
+      label: "1400",
+      value: 2,
+    },
+  ],
+  results: [
+    {
+      label: "1700 micras",
+      data: [
+        {
+          time: 0,
+          massFraction: 0,
+        },
+        {
+          time: 1,
+          massFraction: 15,
+        },
+        {
+          time: 2,
+          massFraction: 20,
+        },
+        {
+          time: 30,
+          massFraction: 80,
+        },
+        {
+          time: 50,
+          massFraction: 90,
+        },
+        {
+          time: 70,
+          massFraction: 87,
+        },
+      ],
+    },
+    {
+      label: "800 micras",
+      data: [
+        {
+          time: 0,
+          massFraction: 0,
+        },
+        {
+          time: 1,
+          massFraction: 10,
+        },
+        {
+          time: 2,
+          massFraction: 10,
+        },
+        {
+          time: 30,
+          massFraction: 40,
+        },
+        {
+          time: 50,
+          massFraction: 60,
+        },
+        {
+          time: 70,
+          massFraction: 100,
+        },
+      ],
+    },
+    {
+      label: "100 micras",
+      micras: 100,
+      data: [
+        {
+          time: 0,
+          massFraction: 0,
+        },
+        {
+          time: 1,
+          massFraction: 10,
+        },
+        {
+          time: 2,
+          massFraction: 40,
+        },
+        {
+          time: 30,
+          massFraction: 40,
+        },
+        {
+          time: 50,
+          massFraction: 60,
+        },
+        {
+          time: 70,
+          massFraction: 110,
+        },
+      ],
+    },
+  ],
+};
+
+type ChartDataValues = { [Key: string]: number };
 
 export function MainResults() {
+  const chartData = responseFromBackend.results.reduce((acc, curr) => {
+    if (acc.length === 0) {
+      return curr.data.map((value) => ({
+        time: value.time,
+        [curr.label]: value.massFraction,
+      }));
+    }
+
+    const newAcc = acc.map((value, idx) => ({
+      ...value,
+      [curr.label]: curr.data[idx].massFraction,
+    }));
+
+    return newAcc;
+  }, [] as ChartDataValues[]);
+
+  const chartConfig = Object.entries(chartData[0]).reduce(
+    (acc, [currKey, currValue]) => {
+      console.log(currKey, currValue);
+
+      return {
+        ...acc,
+        [currKey]: {
+          label: "time",
+          color: "hsl(var(--chart-2))",
+        },
+      };
+    },
+    {} satisfies ChartConfig
+  );
+
+  const lines = Object.entries(chartConfig)
+    .map((entry) => ({
+      key: entry[0],
+      dataKey: entry[0],
+    }))
+    .filter((value) => value.dataKey !== "time");
+
   return (
-    <div className="flex justify-center w-full h-full">
-      <Computer className="self-center" size={128} />
+    <div className="flex justify-center w-full h-full p-8">
+      {/* <Computer className="self-center" size={128} /> */}
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Line Chart - Dots Colors</CardTitle>
-          <CardDescription>January - June 2024</CardDescription>
+          <CardTitle>Simulation Results</CardTitle>
+          <CardDescription>Run simulation</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig}>
@@ -73,6 +191,9 @@ export function MainResults() {
               }}
             >
               <CartesianGrid vertical={false} />
+              <XAxis dataKey="time" />
+              <YAxis />
+              <Legend />
               <ChartTooltip
                 cursor={false}
                 content={
@@ -83,33 +204,23 @@ export function MainResults() {
                   />
                 }
               />
-              <Line
-                dataKey="visitors"
-                type="natural"
-                stroke="var(--color-visitors)"
-                strokeWidth={2}
-                dot={({ payload, ...props }) => {
-                  return (
-                    <Dot
-                      key={payload.browser}
-                      r={5}
-                      cx={props.cx}
-                      cy={props.cy}
-                      fill={payload.fill}
-                      stroke={payload.fill}
-                    />
-                  );
-                }}
-              />
+              {lines.map((line) => (
+                <Line
+                  key={line.key}
+                  type="monotone"
+                  dataKey={line.dataKey}
+                  stroke="#8884d8"
+                />
+              ))}
             </LineChart>
           </ChartContainer>
         </CardContent>
         <CardFooter className="flex-col items-start gap-2 text-sm">
           <div className="flex gap-2 font-medium leading-none">
-            Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+            Trending up by 5.2% <TrendingUp className="h-4 w-4" />
           </div>
           <div className="leading-none text-muted-foreground">
-            Showing total visitors for the last 6 months
+            Could be suggestions of what to do??
           </div>
         </CardFooter>
       </Card>
