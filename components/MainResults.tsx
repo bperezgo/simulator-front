@@ -150,9 +150,7 @@ export function MainResults() {
   }, [] as ChartDataValues[]);
 
   const chartConfig = Object.entries(chartData[0]).reduce(
-    (acc, [currKey, currValue]) => {
-      console.log(currKey, currValue);
-
+    (acc, [currKey]) => {
       return {
         ...acc,
         [currKey]: {

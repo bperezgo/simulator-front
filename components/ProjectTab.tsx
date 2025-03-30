@@ -21,7 +21,7 @@ import { MolinosModal } from "@/components/ModalMill";
 export function ProjectTab() {
   const [showInputFile, setShowInputFile] = useState(false);
 
-  const handleMolinoClick = () => {
+  const handleClickOnMill = () => {
     setShowInputFile(true);
   };
 
@@ -40,7 +40,7 @@ export function ProjectTab() {
                 New Proyect <MenubarShortcut>⌘T</MenubarShortcut>
               </MenubarSubTrigger>
               <MenubarSubContent>
-                <MenubarItem onClick={handleMolinoClick}>Molinos</MenubarItem>
+                <MenubarItem onClick={handleClickOnMill}>Molinos</MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
             <MenubarItem>
