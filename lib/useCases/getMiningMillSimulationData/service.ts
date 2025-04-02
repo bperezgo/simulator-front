@@ -4,7 +4,6 @@ import { miningMillSimulatorRepository } from "@/lib/platform/repositories/minin
 export const getMiningMillSimulationService = {
     async sendData(data: MillingSimulationCommand): Promise<MillingSimulationResponse> {
         const response = await miningMillSimulatorRepository.simulate(data)
-        console.log("response", response)
         return response
     },
 }

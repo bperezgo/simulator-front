@@ -15,12 +15,11 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar"
-import { useState } from "react";
 import { ModalMill } from "@/components/ModalMill";
+import { useMillContext } from "@/lib/platform/context/millContext";
 
 export function ProjectTab() {
-  const [showInputFile, setShowInputFile] = useState(false);
-
+  const { showInputFile, setShowInputFile } = useMillContext();
   const handleClickOnMill = () => {
     setShowInputFile(true);
   };

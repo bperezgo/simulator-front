@@ -19,13 +19,25 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useMillContext } from "@/lib/platform/context/millContext";
+import { Progress } from "./ui/progress";
 
 type ChartDataValues = { [Key: string]: number };
 
 export function MainResults() {
-  const { millDataSimulation } = useMillContext();
+  const { millDataSimulation, isLoadingData } = useMillContext();
+  if (isLoadingData) {
+    return (
+      <div className="flex justify-center content-center w-full h-full p-8">
+        <Progress className="self-center" value={50} />
+      </div>
+    );
+  }
   if (!millDataSimulation) {
-    return <div>No data</div>;
+    return (
+      <div className="flex justify-center w-full h-full p-8">
+        <span className="text-muted-foreground self-center">No data</span>
+      </div>
+    );
   }
 
   const chartData = millDataSimulation.results.reduce((acc, curr) => {

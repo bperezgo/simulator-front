@@ -87,7 +87,7 @@ export function InputFile() {
 }
 
 export function InputForm() {
-  const { inputDataFile, setInputDataFile } = useMillContext();
+  const { inputDataFile, setInputDataFile, setShowInputFile, setIsLoadingData } = useMillContext();
   const [outputDataFile, setOutputDataFile] = useState<
     Record<string, string>[] | null
   >(null);
@@ -125,8 +125,12 @@ export function InputForm() {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     const command = onSubmitDataToCommand(data, inputDataFile, outputDataFile);
+    // TODO: Add input validation, before to set as false the showInputFile
+    setShowInputFile(false);
+    setIsLoadingData(true);
     const response = await getMiningMillSimulationService.sendData(command);
     setMillDataSimulation(response);
+    setIsLoadingData(false);
   }
 
   return (

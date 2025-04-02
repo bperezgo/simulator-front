@@ -7,11 +7,15 @@ interface MillContextType {
   inputDataFile: Record<string, string>[] | null;
   outputDataFile: Record<string, string>[] | null;
   millDataSimulation: MillingSimulationResponse | null;
+  showInputFile: boolean;
+  isLoadingData: boolean;
   setInputDataFile: (inputDataFile: Record<string, string>[] | null) => void;
   setOutputDataFile: (outputDataFile: Record<string, string>[] | null) => void;
   setMillDataSimulation: (
     millDataSimulation: MillingSimulationResponse | null
   ) => void;
+  setShowInputFile: (showInputFile: boolean) => void;
+  setIsLoadingData: (isLoadingData: boolean) => void;
 }
 
 const MillContext = createContext<MillContextType | null>(null);
@@ -25,14 +29,20 @@ export function MillProvider({ children }: { children: React.ReactNode }) {
   >(null);
   const [millDataSimulation, setMillDataSimulation] =
     useState<MillingSimulationResponse | null>(null);
+  const [showInputFile, setShowInputFile] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const value = {
     inputDataFile,
     outputDataFile,
     millDataSimulation,
+    showInputFile,
+    isLoadingData,
     setInputDataFile,
     setOutputDataFile,
     setMillDataSimulation,
+    setShowInputFile,
+    setIsLoadingData,
   };
 
   return <MillContext.Provider value={value}>{children}</MillContext.Provider>;
