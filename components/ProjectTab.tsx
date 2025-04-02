@@ -16,7 +16,7 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar"
 import { useState } from "react";
-import { MolinosModal } from "@/components/ModalMill";
+import { ModalMill } from "@/components/ModalMill";
 
 export function ProjectTab() {
   const [showInputFile, setShowInputFile] = useState(false);
@@ -127,7 +127,7 @@ export function ProjectTab() {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <MolinosModal isOpen={showInputFile} onRequestClose={closeModal} />
+      <ModalMill isOpen={showInputFile} onRequestClose={closeModal} />
     </>
   )
 }

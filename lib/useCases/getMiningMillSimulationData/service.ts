@@ -1,12 +1,10 @@
-import { MillingSimulationCommand } from "@/lib/dtos/milling/milling-dto"
-import { miningMillSimulatorRepository } from "@/platform/repositories/miningMillSimulatorRepository"
+import { MillingSimulationCommand, MillingSimulationResponse } from "@/lib/dtos/milling/milling-dto"
+import { miningMillSimulatorRepository } from "@/lib/platform/repositories/miningMillSimulatorRepository"
 
-export const service = {
-    getMiningMillSimulationData() {
-        return miningMillSimulatorRepository.get()
+export const getMiningMillSimulationService = {
+    async sendData(data: MillingSimulationCommand): Promise<MillingSimulationResponse> {
+        const response = await miningMillSimulatorRepository.simulate(data)
+        console.log("response", response)
+        return response
     },
-
-    async dispatchMillingData(data: MillingSimulationCommand): Promise<void> {
-        await miningMillSimulatorRepository.simulate(data)
-    }
 }

@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useMillContext } from "@/lib/platform/context/millContext";
+import { getMiningMillSimulationService } from "@/lib/useCases/getMiningMillSimulationData/service";
+import { MillingSimulationCommand } from "@/lib/dtos/milling/milling-dto";
 
 function csvJSON(csv: string): Record<string, string>[] {
   const lines = csv.split("\n");
@@ -84,8 +87,11 @@ export function InputFile() {
 }
 
 export function InputForm() {
-  const [inputDataFile, setInputDataFile] = useState<Record<string, string>[] | null>(null);
-  const [outputDataFile, setOutputDataFile] = useState<Record<string, string>[] | null>(null);
+  const { inputDataFile, setInputDataFile } = useMillContext();
+  const [outputDataFile, setOutputDataFile] = useState<
+    Record<string, string>[] | null
+  >(null);
+  const { setMillDataSimulation } = useMillContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -102,27 +108,25 @@ export function InputForm() {
     reader.onload = (evt) => {
       const csv = evt.target?.result as string;
       const json = csvJSON(csv);
-      console.log("json", json);
       setInputDataFile(json);
     };
     reader.readAsText(file);
-  }
+  };
 
   const onChangeOutputDataFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (evt) => {
       const csv = evt.target?.result as string;
       const json = csvJSON(csv);
-      console.log("json", json);
       setOutputDataFile(json);
     };
     reader.readAsText(file);
   };
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
-    console.log("data", data);
-    console.log("inputDataFile", inputDataFile);
-    console.log("outputDataFile", outputDataFile);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    const command = onSubmitDataToCommand(data, inputDataFile, outputDataFile);
+    const response = await getMiningMillSimulationService.sendData(command);
+    setMillDataSimulation(response);
   }
 
   return (
@@ -139,7 +143,10 @@ export function InputForm() {
                   {...fieldProps}
                   type="file"
                   onChange={(evt) =>
-                    onChange(evt.target.files && onChangeInputDataFile(evt.target.files[0]))
+                    onChange(
+                      evt.target.files &&
+                        onChangeInputDataFile(evt.target.files[0])
+                    )
                   }
                 />
               </FormControl>
@@ -158,7 +165,10 @@ export function InputForm() {
                   {...fieldProps}
                   type="file"
                   onChange={(evt) =>
-                    onChange(evt.target.files && onChangeOutputDataFile(evt.target.files[0]))
+                    onChange(
+                      evt.target.files &&
+                        onChangeOutputDataFile(evt.target.files[0])
+                    )
                   }
                 />
               </FormControl>
@@ -236,7 +246,7 @@ export function InputForm() {
   );
 }
 
-export function MolinosModal({ isOpen, onRequestClose }: MolinosModalProps) {
+export function ModalMill({ isOpen, onRequestClose }: MolinosModalProps) {
   return (
     <Modal
       isOpen={isOpen}
@@ -260,4 +270,35 @@ export function MolinosModal({ isOpen, onRequestClose }: MolinosModalProps) {
       </div>
     </Modal>
   );
+}
+
+function onSubmitDataToCommand(
+  data: z.infer<typeof formSchema>,
+  inputDataFile: Record<string, string>[] | null,
+  outputDataFile: Record<string, string>[] | null
+): MillingSimulationCommand {
+  if (!inputDataFile || !outputDataFile) {
+    throw new Error("Input or output data file is null");
+  }
+
+  const inputDataFileArray = inputDataFile.map((item) => ({
+    class_: item.class_,
+    fraction: parseFloat(item.fraction),
+  }));
+
+  const outputDataFileArray = outputDataFile.map((item) => ({
+    class_: item.class_,
+    fraction: parseFloat(item.fraction),
+  }));
+
+  return {
+    minutes: data.time,
+    material: {
+      alpha: data.alpha,
+      betha: data.betha,
+      gamma: data.gamma,
+    },
+    input: inputDataFileArray,
+    output: outputDataFileArray,
+  };
 }

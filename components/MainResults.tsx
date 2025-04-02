@@ -18,122 +18,17 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
-const responseFromBackend = {
-  parameters: [
-    {
-      label: "1700",
-      value: 6,
-    },
-    {
-      label: "1600",
-      value: 4,
-    },
-    {
-      label: "1500",
-      value: 3,
-    },
-    {
-      label: "1400",
-      value: 2,
-    },
-  ],
-  results: [
-    {
-      label: "1700 micras",
-      data: [
-        {
-          time: 0,
-          massFraction: 0,
-        },
-        {
-          time: 1,
-          massFraction: 15,
-        },
-        {
-          time: 2,
-          massFraction: 20,
-        },
-        {
-          time: 30,
-          massFraction: 80,
-        },
-        {
-          time: 50,
-          massFraction: 90,
-        },
-        {
-          time: 70,
-          massFraction: 87,
-        },
-      ],
-    },
-    {
-      label: "800 micras",
-      data: [
-        {
-          time: 0,
-          massFraction: 0,
-        },
-        {
-          time: 1,
-          massFraction: 10,
-        },
-        {
-          time: 2,
-          massFraction: 10,
-        },
-        {
-          time: 30,
-          massFraction: 40,
-        },
-        {
-          time: 50,
-          massFraction: 60,
-        },
-        {
-          time: 70,
-          massFraction: 100,
-        },
-      ],
-    },
-    {
-      label: "100 micras",
-      micras: 100,
-      data: [
-        {
-          time: 0,
-          massFraction: 0,
-        },
-        {
-          time: 1,
-          massFraction: 10,
-        },
-        {
-          time: 2,
-          massFraction: 40,
-        },
-        {
-          time: 30,
-          massFraction: 40,
-        },
-        {
-          time: 50,
-          massFraction: 60,
-        },
-        {
-          time: 70,
-          massFraction: 110,
-        },
-      ],
-    },
-  ],
-};
+import { useMillContext } from "@/lib/platform/context/millContext";
 
 type ChartDataValues = { [Key: string]: number };
 
 export function MainResults() {
-  const chartData = responseFromBackend.results.reduce((acc, curr) => {
+  const { millDataSimulation } = useMillContext();
+  if (!millDataSimulation) {
+    return <div>No data</div>;
+  }
+
+  const chartData = millDataSimulation.results.reduce((acc, curr) => {
     if (acc.length === 0) {
       return curr.data.map((value) => ({
         time: value.time,
@@ -149,18 +44,15 @@ export function MainResults() {
     return newAcc;
   }, [] as ChartDataValues[]);
 
-  const chartConfig = Object.entries(chartData[0]).reduce(
-    (acc, [currKey]) => {
-      return {
-        ...acc,
-        [currKey]: {
-          label: "time",
-          color: "hsl(var(--chart-2))",
-        },
-      };
-    },
-    {} satisfies ChartConfig
-  );
+  const chartConfig = Object.entries(chartData[0]).reduce((acc, [currKey]) => {
+    return {
+      ...acc,
+      [currKey]: {
+        label: "time",
+        color: "hsl(var(--chart-2))",
+      },
+    };
+  }, {} satisfies ChartConfig);
 
   const lines = Object.entries(chartConfig)
     .map((entry) => ({
@@ -171,7 +63,6 @@ export function MainResults() {
 
   return (
     <div className="flex justify-center w-full h-full p-8">
-      {/* <Computer className="self-center" size={128} /> */}
       <Card className="w-full">
         <CardHeader>
           <CardTitle>Simulation Results</CardTitle>
