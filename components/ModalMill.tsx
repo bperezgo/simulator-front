@@ -17,10 +17,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { useMillContext } from "@/lib/platform/context/millContext";
 import { getMiningMillSimulationService } from "@/lib/useCases/getMiningMillSimulationData/service";
 import { MillingSimulationCommand } from "@/lib/dtos/milling/milling-dto";
+import { PreviewTable } from "./PreviewTable";
 
 function csvJSON(csv: string): Record<string, string>[] {
   const lines = csv.split("\n");
@@ -87,10 +87,14 @@ export function InputFile() {
 }
 
 export function InputForm() {
-  const { inputDataFile, setInputDataFile, setShowInputFile, setIsLoadingData } = useMillContext();
-  const [outputDataFile, setOutputDataFile] = useState<
-    Record<string, string>[] | null
-  >(null);
+  const {
+    inputDataFile,
+    outputDataFile,
+    setInputDataFile,
+    setOutputDataFile,
+    setShowInputFile,
+    setIsLoadingData,
+  } = useMillContext();
   const { setMillDataSimulation } = useMillContext();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -251,26 +255,58 @@ export function InputForm() {
 }
 
 export function ModalMill({ isOpen, onRequestClose }: MolinosModalProps) {
+  const { inputDataFile, outputDataFile } = useMillContext();
+
+  const dataInputDataFile =
+    inputDataFile?.map((item) => ({
+      class_: item.class_,
+      fraction: item.fraction,
+    })) ?? [];
+
+  const dataOutputDataFile =
+    outputDataFile?.map((item) => ({
+      class_: item.class_,
+      fraction: item.fraction,
+    })) ?? [];
+
   return (
     <Modal
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       contentLabel="Molinos Modal"
-      className="modal"
+      className="modal w-full ml-4 mr-4"
       overlayClassName="overlay"
       ariaHideApp={false}
     >
-      <div className="mt-4 p-4 border rounded">
-        <button
-          onClick={onRequestClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
-        >
-          <X size={24} />
-        </button>
+      <div className="mt-4 p-4 border rounded w-full flex flex-row justify-between">
+        <div className="flex flex-col w-full">
+          <button
+            onClick={onRequestClose}
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+          >
+            <X size={24} />
+          </button>
 
-        <h1>Modulo de Molinos</h1>
+          <h1>Modulo de Molinos</h1>
 
-        <InputForm />
+          <InputForm />
+        </div>
+        <div className="flex flex-col gap-4 w-full">
+          <div className="h-full">
+            <PreviewTable
+              title="Input Data"
+              headers={["class_", "fraction"]}
+              data={dataInputDataFile}
+            />
+          </div>
+          <div className="h-full">
+            <PreviewTable
+              title="Output Data"
+              headers={["class_", "fraction"]}
+              data={dataOutputDataFile}
+            />
+          </div>
+        </div>
       </div>
     </Modal>
   );
